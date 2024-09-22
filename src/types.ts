@@ -2,6 +2,7 @@ export type List = {
   userId: number;
   entries: ListEntry[];
 };
+
 export type ListEntry = {
   // id number for the show on anilist/mal
   id: number;

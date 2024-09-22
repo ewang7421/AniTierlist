@@ -8,8 +8,6 @@ import {
   VStack,
   Text,
   Flex,
-  Text,
-  Flex,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { getList } from "./anilist";
@@ -58,23 +56,9 @@ export const Dashboard = () => {
         </HStack>
 
         <Tierlist dragging={dragging} setDragging={setDragging} />
-        
+
         <Flex flexWrap="wrap">
           {animeList.entries &&
-            animeList.entries.map((entry) => (
-              <Box
-                draggable="true"
-                onDragStart={() => {
-                  setDragging(entry);
-                }}
-                onDragEnd={() => {
-                  setDragging({} as ListEntry);
-                }}
-              >
-                <Image src={entry.imageUrl} />
-              </Box>
-            ))}
-        </Flex>
             animeList.entries.map((entry) => (
               <Box
                 draggable="true"

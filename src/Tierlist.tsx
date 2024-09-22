@@ -13,26 +13,27 @@ export const Tierlist = ({ dragging, setDragging }: TierlistProps) => {
   ] as TierModel[]);
 
   // TODO: Unsure if index is needed. Tiers will be organized by some value that we assign to it anyway
-  type TierProps = {
-    index: number;
+  interface TierProps {
     model: TierModel;
-  };
+    index: number;
+  }
 
-  const handleDrop = () => {};
+  const handleDrop = (model: TierModel) => {
+    model.entries.push(dragging);
+    console.log(model.entries);
+  };
 
   const Tier = ({ model, index }: TierProps) => {
     return (
-      <Flex border="1px">
-        <Box border="1px">S Tier</Box>
+      <Flex border="1px" w="100%">
+        <Box border="1px" w="100px" h="100px">
+          S Tier
+        </Box>
         <Flex
           border="1px"
-          flexGrow={1}
           flexWrap="wrap"
           onDragOver={(e) => e.preventDefault()}
-          onDrop={() => {
-            model.entries.push(dragging);
-            console.log(model.entries);
-          }}
+          onDrop={() => handleDrop(model)}
         >
           {model.entries.map((entry, index) => (
             <Image src={entry.imageUrl}></Image>
@@ -43,14 +44,14 @@ export const Tierlist = ({ dragging, setDragging }: TierlistProps) => {
   };
 
   return (
-    <Box>
-      <VStack>
+    <Flex w="100%">
+      <VStack w="100%">
         <Text>Tierlist</Text>
         {tierModels &&
           tierModels.map((model, index) => (
             <Tier model={model} index={index} />
           ))}
       </VStack>
-    </Box>
+    </Flex>
   );
 };

@@ -57,8 +57,7 @@ export async function getList(
     const data = await handleResponse(response);
     return handleData(data, callback);
   } catch (error) {
-    handleError(error);
-    return {} as List;
+    return handleError(error);
   }
 }
 
