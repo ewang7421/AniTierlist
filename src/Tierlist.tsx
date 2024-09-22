@@ -25,13 +25,14 @@ export const Tierlist = ({ dragging, setDragging }: TierlistProps) => {
 
   const Tier = ({ model, index }: TierProps) => {
     return (
-      <Flex border="1px" w="100%">
+      <Flex flexDirection="row" border="1px">
         <Box border="1px" w="100px" h="100px">
           S Tier
         </Box>
         <Flex
           border="1px"
           flexWrap="wrap"
+          flexGrow={1}
           onDragOver={(e) => e.preventDefault()}
           onDrop={() => handleDrop(model)}
         >
@@ -44,14 +45,10 @@ export const Tierlist = ({ dragging, setDragging }: TierlistProps) => {
   };
 
   return (
-    <Flex w="100%">
-      <VStack w="100%">
-        <Text>Tierlist</Text>
-        {tierModels &&
-          tierModels.map((model, index) => (
-            <Tier model={model} index={index} />
-          ))}
-      </VStack>
+    <Flex w="100%" flexDirection="column">
+      <Text>Tierlist</Text>
+      {tierModels &&
+        tierModels.map((model, index) => <Tier model={model} index={index} />)}
     </Flex>
   );
 };

@@ -12,14 +12,14 @@ import {
 import { useState } from "react";
 import { getList } from "./anilist";
 import { List, ListWebsite, ListEntry } from "./types";
-import { title } from "process";
 import { Tierlist } from "./Tierlist";
+import { Inventory } from "./Inventory";
 
 export const Dashboard = () => {
   const [username, setUsername] = useState("");
   const [listWebsite, setListWebsite] = useState(ListWebsite.AniList);
   const [animeList, setAnimeList] = useState({} as List);
-  const [dragging, setDragging] = useState({} as ListEntry);
+  const [dragging, setDragging] = useState(undefined);
 
   return (
     <Box>
@@ -56,6 +56,11 @@ export const Dashboard = () => {
         </HStack>
 
         <Tierlist dragging={dragging} setDragging={setDragging} />
+        <Inventory
+          dragging={dragging}
+          setDragging={setDragging}
+          animeList={animeList}
+        />
 
         <Flex flexWrap="wrap">
           {animeList.entries &&
