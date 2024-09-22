@@ -1,5 +1,5 @@
-import { assert } from "console";
 import type { List, ListEntry } from "./types";
+import { SetStateAction } from "react";
 // Here we define our query as a multi-line string
 // Storing it in a separate .graphql/.gql file is also possible
 let query = `
@@ -31,7 +31,10 @@ query ($userName: String) { # Define which variables will be used in the query (
 `;
 
 // Make the HTTP Api request
-export async function getList(username: string) {
+export async function getList(
+  username: string,
+  callback: React.Dispatch<SetStateAction<List>>
+) {
   // Define our query variables and values that will be used in the query request
   let variables = {
     userName: username,
@@ -52,7 +55,7 @@ export async function getList(username: string) {
   try {
     const response = await fetch(url, options);
     const data = await handleResponse(response);
-    return handleData(data);
+    return handleData(data, callback);
   } catch (error) {
     handleError(error);
     return {} as List;
@@ -64,19 +67,22 @@ async function handleResponse(response: Response) {
   return response.ok ? json : Promise.reject(json);
 }
 
-function handleData(data: any): List {
+function handleData(
+  data: any,
+  callback: React.Dispatch<SetStateAction<List>>
+): List {
   console.log(data);
   let completedList = data.data.MediaListCollection.lists.filter(
     (list: any) => !list.isCustomList && list.status === "COMPLETED"
   )[0];
-  console.log(completedList)
+  console.log(completedList);
 
-  let entries: ListEntry[] = completedList.entries.map((elm: any) => ({
-    id: elm.media.id,
-    idMal: elm.media.idMal,
-    title: elm.media.title.romaji,
-    imageUrl: elm.media.coverImage.large,
-    score: elm.score,
+  let entries: ListEntry[] = completedList.entries.map((entry: any) => ({
+    id: entry.media.id,
+    idMal: entry.media.idMal,
+    title: entry.media.title.romaji,
+    imageUrl: entry.media.coverImage.large,
+    score: entry.score,
     tier: 0,
   }));
 
@@ -89,6 +95,7 @@ function handleData(data: any): List {
   let ret = { userId: data.data.MediaListCollection.user.id, entries: entries };
 
   console.log(ret);
+  callback(ret);
   return ret;
 }
 
