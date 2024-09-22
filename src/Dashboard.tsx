@@ -6,30 +6,34 @@ import {
   Box,
   HStack,
   VStack,
+  Text,
+  Flex,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { getList } from "./anilist";
-import { List, ListEntry } from "./types";
+import { List, ListWebsite, ListEntry } from "./types";
 import { title } from "process";
 import { Tierlist } from "./Tierlist";
+
 export const Dashboard = () => {
   const [username, setUsername] = useState("");
-  const [listWebsite, setListWebsite] = useState("anilist");
+  const [listWebsite, setListWebsite] = useState(ListWebsite.AniList);
   const [animeList, setAnimeList] = useState({} as List);
+  const [dragging, setDragging] = useState({} as ListEntry);
 
   return (
     <Box>
       <VStack>
-        <p> Dashboard </p>
-        <Tierlist />
+        <Text>Dashboard</Text>
         <HStack>
           <Select
-            value="anilist"
+            value={ListWebsite.AniList}
             onChange={(e) => {
-              setListWebsite(e.target.value);
+              setListWebsite(e.target.value as ListWebsite);
             }}
           >
-            <option value="anilist"> Anilist </option>
+            <option value={ListWebsite.AniList}> AniList </option>
+            <option value={ListWebsite.MyAnimeList}> MyAnimeList </option>
           </Select>
           <Input
             placeholder="username"
@@ -40,7 +44,7 @@ export const Dashboard = () => {
           <Button
             onClick={async () => {
               try {
-                setAnimeList(await getList(username)); // Set the state with the fetched data
+                getList(username, setAnimeList); // Set the state with the fetched data
                 console.log(animeList);
               } catch (error) {
                 console.error("Error fetching anime list:", error);
@@ -50,12 +54,25 @@ export const Dashboard = () => {
             get
           </Button>
         </HStack>
-        <Box>
+
+        <Tierlist dragging={dragging} setDragging={setDragging} />
+        
+        <Flex flexWrap="wrap">
           {animeList.entries &&
-            animeList.entries.map((entry) => {
-              return <Image src={entry.imageUrl} />;
-            })}
-        </Box>
+            animeList.entries.map((entry) => (
+              <Box
+                draggable="true"
+                onDragStart={() => {
+                  setDragging(entry);
+                }}
+                onDragEnd={() => {
+                  setDragging({} as ListEntry);
+                }}
+              >
+                <Image src={entry.imageUrl} />
+              </Box>
+            ))}
+        </Flex>
       </VStack>
     </Box>
   );

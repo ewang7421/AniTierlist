@@ -3,11 +3,20 @@ export type List = {
   entries: ListEntry[];
 };
 export type ListEntry = {
-  // media id numberF
+  // id number for the show on anilist/mal
   id: number;
   idMal: number;
   title: string;
   imageUrl: string;
   score: number;
   tier: number;
+};
+
+export const enum ListWebsite {
+  AniList = "ANILIST",
+  MyAnimeList = "MYANIMELIST",
+}
+
+export type TierModel = {
+  entries: ListEntry[];
 };
