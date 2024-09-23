@@ -19,9 +19,9 @@ export const Dashboard = () => {
   const [tierlistModel, setTierlistModel] = useState<TierlistModel>({
     inventory: [],
     models: [
+      { entries: [], tierName: "A", minScore: 8, maxScore: 10 },
+      { entries: [], tierName: "C", minScore: 6, maxScore: 7 },
       { entries: [], tierName: "F", minScore: 0, maxScore: 5 },
-      { entries: [], tierName: "C", minScore: 5, maxScore: 7 },
-      { entries: [], tierName: "A", minScore: 7, maxScore: 10 },
     ],
   });
 
@@ -47,7 +47,40 @@ export const Dashboard = () => {
 
     event.dataTransfer.dropEffect = "move";
 
-    console.log("dragging:", dragging.entry.id, "tierIndex:", tierIndex);
+    event.currentTarget.style.backgroundColor = "lightblue";
+
+    if (dragging.removed) {
+      return;
+    }
+
+    // Remove the entry from the source tier
+    if (dragging.srcTierIndex !== -1) {
+      const srcTierModel = tierlistModel.models[dragging.srcTierIndex];
+      const newEntries = srcTierModel.entries.filter((entry) => entry.id !== dragging.entry.id);
+      const newTierModel = { ...srcTierModel, entries: newEntries };
+      setTierlistModel((tierlistModel) => ({
+        ...tierlistModel,
+        models: [
+          ...tierlistModel.models.slice(0, dragging.srcTierIndex),
+          newTierModel,
+          ...tierlistModel.models.slice(dragging.srcTierIndex + 1),
+        ],
+        dragging: { ...dragging, removed: true },
+      }));
+    } else {
+      const newEntries = tierlistModel.inventory.filter((entry) => entry.id !== dragging.entry.id);
+      setTierlistModel((tierlistModel) => ({
+        ...tierlistModel,
+        inventory: newEntries,
+        dragging: { ...dragging, removed: true },
+      }));
+    }
+  }
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+
+    event.currentTarget.style.backgroundColor = "";
   }
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>, tierIndex: number) => {
@@ -58,8 +91,26 @@ export const Dashboard = () => {
       return;
     }
 
-    // Dropping into inventory
-    if (tierIndex === -1) {
+    event.currentTarget.style.backgroundColor = "";
+
+    // Add the entry to the destination tier
+    if (tierIndex !== -1) {
+      const destTierModel = tierlistModel.models[tierIndex];
+      const newEntries = [
+        ...destTierModel.entries,
+        dragging.entry,
+      ];
+      const newTierModel = { ...destTierModel, entries: newEntries };
+      setTierlistModel((tierlistModel) => ({
+        ...tierlistModel,
+        models: [
+          ...tierlistModel.models.slice(0, tierIndex),
+          newTierModel,
+          ...tierlistModel.models.slice(tierIndex + 1),
+        ],
+        dragging: undefined,
+      }));
+    } else {
       setTierlistModel((tierlistModel) => ({
         ...tierlistModel,
         inventory: [
@@ -68,25 +119,8 @@ export const Dashboard = () => {
         ],
         dragging: undefined,
       }));
-      console.log("dropped into inventory, id:", dragging.entry.id);
-      return;
     }
 
-    const destTierModel = tierlistModel.models[tierIndex];
-    const newEntries = [
-      ...destTierModel.entries,
-      dragging.entry,
-    ];
-    const newTierModel = { ...destTierModel, entries: newEntries };
-    setTierlistModel((tierlistModel) => ({
-      ...tierlistModel,
-      models: [
-        ...tierlistModel.models.slice(0, tierIndex),
-        newTierModel,
-        ...tierlistModel.models.slice(tierIndex + 1),
-      ],
-      dragging: undefined,
-    }));
   }
 
   return (
@@ -127,8 +161,8 @@ export const Dashboard = () => {
           </Button>
         </HStack>
 
-        <Tierlist tierModels={tierlistModel.models} handleDragStart={handleDragStart} handleDragOver={handleDragOver} handleDrop={handleDrop} />
-        <Inventory entries={tierlistModel.inventory} handleDragStart={handleDragStart} handleDragOver={handleDragOver} handleDrop={handleDrop} />
+        <Tierlist tierModels={tierlistModel.models} handleDragStart={handleDragStart} handleDragOver={handleDragOver} handleDragLeave={handleDragLeave} handleDrop={handleDrop} />
+        <Inventory entries={tierlistModel.inventory} handleDragStart={handleDragStart} handleDragOver={handleDragOver} handleDragLeave={handleDragLeave} handleDrop={handleDrop} />
 
       </VStack>
     </Box>

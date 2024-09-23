@@ -23,6 +23,7 @@ export type TierModel = {
 export type DraggableEntry = {
   entry: ListEntry;
   srcTierIndex: number; // -1 if from inventory
+  removed: boolean;
 };
 
 export type TierlistModel = {
