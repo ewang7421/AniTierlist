@@ -1,9 +1,9 @@
 import { Box, Flex, Image } from "@chakra-ui/react";
-import { DraggableEntry, ListEntry } from "./types";
+import { DraggedEntry, ListEntry } from "./types";
 
 interface InventoryProps {
   entries: ListEntry[];
-  handleDragStart: (event: React.DragEvent<HTMLDivElement>, entry: DraggableEntry) => void;
+  handleDragStart: (event: React.DragEvent<HTMLDivElement>, entry: DraggedEntry) => void;
   handleDragOver: (event: React.DragEvent<HTMLDivElement>, tierIndex: number) => void;
   handleDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
   handleDrop: (event: React.DragEvent<HTMLDivElement>, tierIndex: number) => void;
@@ -21,7 +21,7 @@ export const Inventory = ({ entries, handleDragStart, handleDragOver, handleDrag
           key={entry.id}
           draggable="true"
           onDragStart={(e) => {
-            handleDragStart(e, { entry, srcTierIndex: -1, removed: false });
+            handleDragStart(e, { entry, srcTierIndex: -1, removedFromSrc: false });
           }}
         >
           <Image src={entry.imageUrl} />

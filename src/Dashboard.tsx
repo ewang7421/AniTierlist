@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { getList } from "./anilist";
-import { ListWebsite, TierlistModel, DraggableEntry } from "./types";
+import { ListWebsite, TierlistModel, DraggedEntry } from "./types";
 import { Tierlist } from "./Tierlist";
 import { Inventory } from "./Inventory";
 
@@ -25,19 +25,14 @@ export const Dashboard = () => {
     ],
   });
 
-  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, dragEntry: DraggableEntry) => {
-    event.stopPropagation();
-
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, dragEntry: DraggedEntry) => {
     setTierlistModel((tierlistModel) => ({
       ...tierlistModel,
       dragging: dragEntry,
     }));
-
-    event.dataTransfer.effectAllowed = "move";
   }
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>, tierIndex: number) => {
-    event.stopPropagation();
     event.preventDefault();
 
     const { dragging } = tierlistModel;
@@ -45,11 +40,10 @@ export const Dashboard = () => {
       return;
     }
 
-    event.dataTransfer.dropEffect = "move";
-
+    // TODO: show a preview of where the entry will be placed
     event.currentTarget.style.backgroundColor = "lightblue";
 
-    if (dragging.removed) {
+    if (dragging.removedFromSrc) {
       return;
     }
 
@@ -65,32 +59,30 @@ export const Dashboard = () => {
           newTierModel,
           ...tierlistModel.models.slice(dragging.srcTierIndex + 1),
         ],
-        dragging: { ...dragging, removed: true },
+        dragging: { ...dragging, removedFromSrc: true },
       }));
     } else {
       const newEntries = tierlistModel.inventory.filter((entry) => entry.id !== dragging.entry.id);
       setTierlistModel((tierlistModel) => ({
         ...tierlistModel,
         inventory: newEntries,
-        dragging: { ...dragging, removed: true },
+        dragging: { ...dragging, removedFromSrc: true },
       }));
     }
   }
 
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-
+    // TODO: get rid of the preview
     event.currentTarget.style.backgroundColor = "";
   }
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>, tierIndex: number) => {
-    event.stopPropagation();
-
     const { dragging } = tierlistModel;
     if (!dragging) {
       return;
     }
 
+    // TODO: get rid of the preview
     event.currentTarget.style.backgroundColor = "";
 
     // Add the entry to the destination tier
@@ -120,7 +112,6 @@ export const Dashboard = () => {
         dragging: undefined,
       }));
     }
-
   }
 
   return (
