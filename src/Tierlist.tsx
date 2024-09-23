@@ -1,4 +1,4 @@
-import { Image, Box, Text, Flex } from "@chakra-ui/react";
+import { Image, Box, Text, Flex, Center } from "@chakra-ui/react";
 import { DraggedEntry, TierModel } from "./types";
 
 interface TierlistProps {
@@ -19,9 +19,9 @@ export const Tierlist = ({ tierModels, handleDragStart, handleDragOver, handleDr
   const Tier = ({ model, index }: TierProps) => {
     return (
       <Flex border="1px">
-        <Box border="1px" w="100px" minH="100px">
+        <Center border="1px" w="100px" minH="100px">
           {model.tierName}
-        </Box>
+        </Center>
         <Flex
           border="1px"
           flexWrap="wrap"
@@ -51,7 +51,34 @@ export const Tierlist = ({ tierModels, handleDragStart, handleDragOver, handleDr
     <Flex w="100%" flexDirection="column">
       <Text>Tierlist</Text>
       {tierModels &&
-        tierModels.map((model, index) => <Tier model={model} index={index} key={index} />)}
+        tierModels.map((model, index) =>
+          <Flex border="1px">
+            <Center border="1px" w="100px" minH="100px">
+              {model.tierName}
+            </Center>
+            <Flex
+              border="1px"
+              flexWrap="wrap"
+              flexGrow={1}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+            >
+              {model.entries &&
+                model.entries.map((entry) => (
+                  <Box id={entry.id.toString()}
+                    key={entry.id}
+                    draggable="true"
+                    onDragStart={(e) => {
+                      handleDragStart(e, { entry, srcTierIndex: index, removedFromSrc: false });
+                    }}
+                  >
+                    <Image src={entry.imageUrl} />
+                  </Box>
+                ))}
+            </Flex>
+          </Flex>
+        )}
     </Flex>
   );
 };
