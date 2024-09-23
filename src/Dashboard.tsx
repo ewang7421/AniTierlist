@@ -1,5 +1,4 @@
 import {
-  Image,
   Input,
   Select,
   Button,
@@ -7,19 +6,88 @@ import {
   HStack,
   VStack,
   Text,
-  Flex,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { getList } from "./anilist";
-import { List, ListWebsite, ListEntry } from "./types";
+import { ListWebsite, TierlistModel, DraggableEntry } from "./types";
 import { Tierlist } from "./Tierlist";
 import { Inventory } from "./Inventory";
 
 export const Dashboard = () => {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("watermeloans");
   const [listWebsite, setListWebsite] = useState(ListWebsite.AniList);
-  const [animeList, setAnimeList] = useState({} as List);
-  const [dragging, setDragging] = useState(undefined);
+  const [tierlistModel, setTierlistModel] = useState<TierlistModel>({
+    inventory: [],
+    models: [
+      { entries: [], tierName: "F", minScore: 0, maxScore: 5 },
+      { entries: [], tierName: "C", minScore: 5, maxScore: 7 },
+      { entries: [], tierName: "A", minScore: 7, maxScore: 10 },
+    ],
+  });
+
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, dragEntry: DraggableEntry) => {
+    event.stopPropagation();
+
+    setTierlistModel((tierlistModel) => ({
+      ...tierlistModel,
+      dragging: dragEntry,
+    }));
+
+    event.dataTransfer.effectAllowed = "move";
+  }
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>, tierIndex: number) => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const { dragging } = tierlistModel;
+    if (!dragging) {
+      return;
+    }
+
+    event.dataTransfer.dropEffect = "move";
+
+    console.log("dragging:", dragging.entry.id, "tierIndex:", tierIndex);
+  }
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>, tierIndex: number) => {
+    event.stopPropagation();
+
+    const { dragging } = tierlistModel;
+    if (!dragging) {
+      return;
+    }
+
+    // Dropping into inventory
+    if (tierIndex === -1) {
+      setTierlistModel((tierlistModel) => ({
+        ...tierlistModel,
+        inventory: [
+          ...tierlistModel.inventory,
+          dragging.entry,
+        ],
+        dragging: undefined,
+      }));
+      console.log("dropped into inventory, id:", dragging.entry.id);
+      return;
+    }
+
+    const destTierModel = tierlistModel.models[tierIndex];
+    const newEntries = [
+      ...destTierModel.entries,
+      dragging.entry,
+    ];
+    const newTierModel = { ...destTierModel, entries: newEntries };
+    setTierlistModel((tierlistModel) => ({
+      ...tierlistModel,
+      models: [
+        ...tierlistModel.models.slice(0, tierIndex),
+        newTierModel,
+        ...tierlistModel.models.slice(tierIndex + 1),
+      ],
+      dragging: undefined,
+    }));
+  }
 
   return (
     <Box>
@@ -44,8 +112,12 @@ export const Dashboard = () => {
           <Button
             onClick={async () => {
               try {
-                getList(username, setAnimeList); // Set the state with the fetched data
-                console.log(animeList);
+                const entries = await getList(username); // Set the state with the fetched data
+                // Set the tier list model's inventory to the fetched anime list
+                setTierlistModel((tierlistModel) => ({
+                  ...tierlistModel,
+                  inventory: entries,
+                }));
               } catch (error) {
                 console.error("Error fetching anime list:", error);
               }
@@ -55,29 +127,9 @@ export const Dashboard = () => {
           </Button>
         </HStack>
 
-        <Tierlist dragging={dragging} setDragging={setDragging} />
-        <Inventory
-          dragging={dragging}
-          setDragging={setDragging}
-          animeList={animeList}
-        />
+        <Tierlist tierModels={tierlistModel.models} handleDragStart={handleDragStart} handleDragOver={handleDragOver} handleDrop={handleDrop} />
+        <Inventory entries={tierlistModel.inventory} handleDragStart={handleDragStart} handleDragOver={handleDragOver} handleDrop={handleDrop} />
 
-        <Flex flexWrap="wrap">
-          {animeList.entries &&
-            animeList.entries.map((entry) => (
-              <Box
-                draggable="true"
-                onDragStart={() => {
-                  setDragging(entry);
-                }}
-                onDragEnd={() => {
-                  setDragging({} as ListEntry);
-                }}
-              >
-                <Image src={entry.imageUrl} />
-              </Box>
-            ))}
-        </Flex>
       </VStack>
     </Box>
   );

@@ -1,5 +1,5 @@
-import type { List, ListEntry } from "./types";
-import { SetStateAction } from "react";
+import type { ListEntry } from "./types";
+
 // Here we define our query as a multi-line string
 // Storing it in a separate .graphql/.gql file is also possible
 let query = `
@@ -33,8 +33,7 @@ query ($userName: String) { # Define which variables will be used in the query (
 // Make the HTTP Api request
 export async function getList(
   username: string,
-  callback: React.Dispatch<SetStateAction<List>>
-) {
+): Promise<ListEntry[]> {
   // Define our query variables and values that will be used in the query request
   let variables = {
     userName: username,
@@ -55,9 +54,10 @@ export async function getList(
   try {
     const response = await fetch(url, options);
     const data = await handleResponse(response);
-    return handleData(data, callback);
+    return handleData(data);
   } catch (error) {
-    return handleError(error);
+    handleError(error);
+    return {} as ListEntry[];
   }
 }
 
@@ -68,8 +68,7 @@ async function handleResponse(response: Response) {
 
 function handleData(
   data: any,
-  callback: React.Dispatch<SetStateAction<List>>
-): List {
+): ListEntry[] {
   console.log(data);
   let completedList = data.data.MediaListCollection.lists.filter(
     (list: any) => !list.isCustomList && list.status === "COMPLETED"
@@ -91,11 +90,9 @@ function handleData(
     ).length === 1,
     "There can only be one completed list"
   );
-  let ret = { userId: data.data.MediaListCollection.user.id, entries: entries };
+  // let ret = { userId: data.data.MediaListCollection.user.id, entries: entries };
 
-  console.log(ret);
-  callback(ret);
-  return ret;
+  return entries;
 }
 
 function handleError(error: any): void {

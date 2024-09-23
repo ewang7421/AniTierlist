@@ -1,8 +1,3 @@
-export type List = {
-  userId: number;
-  entries: ListEntry[];
-};
-
 export type ListEntry = {
   // id number for the show on anilist/mal
   id: number;
@@ -20,4 +15,18 @@ export const enum ListWebsite {
 
 export type TierModel = {
   entries: ListEntry[];
+  tierName: string;
+  minScore: number;
+  maxScore: number;
+};
+
+export type DraggableEntry = {
+  entry: ListEntry;
+  srcTierIndex: number; // -1 if from inventory
+};
+
+export type TierlistModel = {
+  inventory: ListEntry[];
+  models: TierModel[];
+  dragging?: DraggableEntry;
 };
