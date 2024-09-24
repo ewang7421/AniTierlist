@@ -1,10 +1,10 @@
 import { Image, Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useState } from "react";
-import { ListEntry, TierModel } from "./types";
+import { draggedEntry, ListEntry, TierModel } from "./types";
 
 interface TierlistProps {
-  dragging: ListEntry;
-  setDragging: React.Dispatch<React.SetStateAction<ListEntry>>;
+  dragging: draggedEntry;
+  setDragging: React.Dispatch<React.SetStateAction<draggedEntry>>;
 }
 
 export const Tierlist = ({ dragging, setDragging }: TierlistProps) => {
@@ -19,7 +19,7 @@ export const Tierlist = ({ dragging, setDragging }: TierlistProps) => {
   }
 
   const handleDrop = (model: TierModel) => {
-    model.entries.push(dragging);
+    model.entries.push(dragging.entry);
     console.log(model.entries);
   };
 

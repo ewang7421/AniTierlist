@@ -13,6 +13,11 @@ export type ListEntry = {
   tier: number;
 };
 
+export type draggedEntry = {
+  entry: ListEntry;
+  index: number;
+};
+
 export const enum ListWebsite {
   AniList = "ANILIST",
   MyAnimeList = "MYANIMELIST",

@@ -9,18 +9,57 @@ import {
   Text,
   Flex,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getList } from "./anilist";
-import { List, ListWebsite, ListEntry } from "./types";
+import { List, ListWebsite, ListEntry, draggedEntry } from "./types";
 import { title } from "process";
 import { Tierlist } from "./Tierlist";
 
 export const Dashboard = () => {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("watermeloans");
   const [listWebsite, setListWebsite] = useState(ListWebsite.AniList);
   const [animeList, setAnimeList] = useState({} as List);
-  const [dragging, setDragging] = useState({} as ListEntry);
+  const [dragging, setDragging] = useState({} as draggedEntry);
 
+  const handleDragStart = (newDragging: draggedEntry) => {
+    setDragging(newDragging);
+    console.log(newDragging);
+  };
+
+  useEffect(() => {}, [animeList]);
+
+  const handleDragOverTier = () => {
+    let newEntries = animeList.entries.filter(
+      (entry) => entry.id !== dragging.entry.id
+    );
+
+    newEntries = [
+      ...newEntries.slice(0, dragging.index),
+      dragging.entry,
+      ...newEntries.slice(dragging.index),
+    ];
+
+    setAnimeList({
+      ...animeList,
+      entries: newEntries,
+    });
+
+    console.log(animeList.entries);
+  };
+
+  const handleDragOverEntry = () => {
+    setAnimeList({
+      ...animeList,
+      entries: animeList.entries.filter(
+        (entry) => entry.id !== dragging.entry.id
+      ),
+    });
+
+    setAnimeList({
+      ...animeList,
+      entries: animeList.entries.splice(0),
+    });
+  };
   return (
     <Box>
       <VStack>
@@ -56,23 +95,27 @@ export const Dashboard = () => {
         </HStack>
 
         <Tierlist dragging={dragging} setDragging={setDragging} />
-
-        <Flex flexWrap="wrap">
-          {animeList.entries &&
-            animeList.entries.map((entry) => (
-              <Box
-                draggable="true"
-                onDragStart={() => {
-                  setDragging(entry);
-                }}
-                onDragEnd={() => {
-                  setDragging({} as ListEntry);
-                }}
-              >
-                <Image src={entry.imageUrl} />
-              </Box>
-            ))}
-        </Flex>
+        <Box onDragOver={handleDragOverTier}>
+          <Flex flexWrap="wrap">
+            {animeList.entries &&
+              animeList.entries.map((entry, index) => (
+                <Box
+                  draggable="true"
+                  onDragStart={() => {
+                    handleDragStart({ entry: entry, index: index });
+                  }}
+                  onDragOver={() => {
+                    setDragging({ ...dragging, index: index });
+                  }}
+                  onDragEnd={() => {
+                    setDragging({} as draggedEntry);
+                  }}
+                >
+                  <Image src={entry.imageUrl} />
+                </Box>
+              ))}
+          </Flex>
+        </Box>
       </VStack>
     </Box>
   );
