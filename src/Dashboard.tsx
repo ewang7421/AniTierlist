@@ -35,6 +35,17 @@ export const Dashboard = () => {
     }));
   };
 
+  const handleDragOverEntry = (index: number) => {
+    const { dragging } = tierlistModel;
+    if (!dragging) {
+      return;
+    }
+    setTierlistModel({
+      ...tierlistModel,
+      dragging: { ...dragging, entryIndex: index },
+    });
+  };
+
   const handleDragOver = (
     event: React.DragEvent<HTMLDivElement>,
     tierIndex: number
@@ -45,9 +56,8 @@ export const Dashboard = () => {
     if (!dragging) {
       return;
     }
-
-    // Remove the entry from the source tier
     removeEntry(dragging.entry, dragging.tierIndex);
+    //addEntry(dragging.entry, dragging.tierIndex, dragging.entryIndex);
   };
 
   const removeEntry = (entry: ListEntry, tierIndex: number) => {
@@ -69,6 +79,41 @@ export const Dashboard = () => {
       const newEntries = tierlistModel.inventory.filter(
         (oldEntry) => oldEntry.id !== entry.id
       );
+      setTierlistModel((tierlistModel) => ({
+        ...tierlistModel,
+        inventory: newEntries,
+      }));
+    }
+  };
+
+  const addEntry = (
+    entry: ListEntry,
+    tierIndex: number,
+    entryIndex: number
+  ) => {
+    if (tierIndex !== -1) {
+      const tierModel = tierlistModel.models[tierIndex];
+      
+      const newEntries = [
+        ...tierModel.entries.slice(0, entryIndex),
+        entry,
+        ...tierModel.entries.slice(entryIndex),
+      ];
+      const newTierModel = { ...tierModel, entries: newEntries };
+      setTierlistModel((tierlistModel) => ({
+        ...tierlistModel,
+        models: [
+          ...tierlistModel.models.slice(0, tierIndex),
+          newTierModel,
+          ...tierlistModel.models.slice(tierIndex + 1),
+        ],
+      }));
+    } else {
+      const newEntries = [
+        ...tierlistModel.inventory.slice(0, entryIndex),
+        entry,
+        ...tierlistModel.inventory.slice(entryIndex),
+      ];
       setTierlistModel((tierlistModel) => ({
         ...tierlistModel,
         inventory: newEntries,
@@ -165,6 +210,7 @@ export const Dashboard = () => {
           entries={tierlistModel.inventory}
           handleDragStart={handleDragStart}
           handleDragOver={handleDragOver}
+          handleDragOverEntry={handleDragOverEntry}
           handleDragLeave={handleDragLeave}
           handleDrop={handleDrop}
         />
