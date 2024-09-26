@@ -51,15 +51,15 @@ export const Dashboard = () => {
     if (!dragging) {
       return;
     }
-    let newDragging = dragging;
-    setTierlistModel({
-      ...tierlistModel,
+    setTierlistModel((prevModel) => ({
+      ...prevModel,
       dragging: {
-        ...newDragging,
-        entryIndex: entryIndex,
+        ...prevModel.dragging!,
         draggingOverEntry: true,
+        entryIndex: entryIndex,
       },
-    });
+    }));
+    console.log(tierlistModel.dragging?.entryIndex);
     if (dragging.tierIndex === -1) {
       const draggedOverEntry = tierlistModel.inventory[entryIndex];
 
@@ -79,11 +79,6 @@ export const Dashboard = () => {
             { ...draggedOverEntry, isPreview: true },
             ...tierlistModel.inventory.slice(entryIndex + 1),
           ],
-          dragging: {
-            ...newDragging,
-            entryIndex: entryIndex,
-            draggingOverEntry: true,
-          },
         });
         return;
       }

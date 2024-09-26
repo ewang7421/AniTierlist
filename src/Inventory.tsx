@@ -33,7 +33,7 @@ export const Inventory = ({
   return (
     <Flex
       flexWrap="wrap"
-      onDragOver={(e) => handleDragOverTier(e, INVENTORY_TIER_INDEX)}
+      //onDragOver={(e) => handleDragOverTier(e, INVENTORY_TIER_INDEX)}
     >
       {entries &&
         entries.map((entry, entryIndex) => (
