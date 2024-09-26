@@ -12,7 +12,7 @@ interface EntryProps {
 export const Entry = ({ entry, tierIndex, entryIndex, handleDragStart, handleDragOver }: EntryProps) => {
   return <Box id={entry.id.toString()}
     draggable="true"
-    onDragStart={(e) => { handleDragStart(e, { entry, srcTierIndex: tierIndex }); }}
+    onDragStart={(e) => { handleDragStart(e, { entry, previewTierIndex: tierIndex }); }}
     onDragOver={(e) => { handleDragOver(e, tierIndex, entryIndex); }}
   >
     <Image src={entry.imageUrl} w="100px" h="100px" opacity={entry.isPreview ? 0.5 : 1} />

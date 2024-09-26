@@ -44,21 +44,6 @@ export const Dashboard = () => {
       return;
     }
 
-    // Remove the entry from the source tier
-    const srcTierModel = tierlistModel.models[dragging.srcTierIndex];
-    if (srcTierModel.entries.find((entry) => entry.id === dragging.entry.id) !== undefined) {
-      const newEntries = srcTierModel.entries.filter((entry) => entry.id !== dragging.entry.id);
-      const newTierModel = { ...srcTierModel, entries: newEntries };
-      setTierlistModel((tierlistModel) => ({
-        ...tierlistModel,
-        models: [
-          ...tierlistModel.models.slice(0, dragging.srcTierIndex),
-          newTierModel,
-          ...tierlistModel.models.slice(dragging.srcTierIndex + 1),
-        ],
-      }));
-    }
-
     // Remove the preview from it's previous location
     let newModels = tierlistModel.models;
     if (dragging.previewTierIndex !== undefined && dragging.previewTierIndex !== tierIndex) {
