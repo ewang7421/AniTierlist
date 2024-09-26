@@ -33,7 +33,6 @@ export type DraggedEntry = {
 
 // The model for the tierlist
 export type TierlistModel = {
-  inventory: ListEntry[];
   models: TierModel[];
   dragging?: DraggedEntry;
 };

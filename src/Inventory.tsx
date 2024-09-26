@@ -1,5 +1,7 @@
 import { Box, Flex, Image } from "@chakra-ui/react";
-import { DraggedEntry, ListEntry } from "./types";
+import { ListEntry } from "./types";
+import React from "react";
+import { SSL_OP_NO_TLSv1_1 } from "constants";
 
 interface InventoryProps {
   entries: ListEntry[];
@@ -8,32 +10,38 @@ interface InventoryProps {
     tierIndex: number,
     entryIndex: number
   ) => void;
-  handleDragOverEntry: (
+  handleDragEnterEntry: (
     event: React.DragEvent<HTMLDivElement>,
-    entryIndex: number
+    entryIndex: number,
+    tierIndex: number
   ) => void;
   handleDragLeaveEntry: () => void;
-  handleDragOverTier: (
+  handleDragEnterTier: (
     event: React.DragEvent<HTMLDivElement>,
     tierIndex: number
   ) => void;
-  handleDragEnd: () => void;
+
+  ultimateDragEnter: (
+    e: React.DragEvent<HTMLDivElement>,
+    entryIndex: number,
+    tierIndex: number
+  ) => void;
 }
 
-const INVENTORY_TIER_INDEX = -1;
+const INVENTORY_TIER_INDEX = 0;
 
 export const Inventory = ({
   entries,
   handleDragStart,
-  handleDragOverEntry,
+  handleDragEnterEntry,
   handleDragLeaveEntry,
-  handleDragOverTier,
-  handleDragEnd,
+  handleDragEnterTier,
+  ultimateDragEnter,
 }: InventoryProps) => {
   return (
     <Flex
       flexWrap="wrap"
-      //onDragOver={(e) => handleDragOverTier(e, INVENTORY_TIER_INDEX)}
+      onDragEnter={(e) => ultimateDragEnter(e, -1, INVENTORY_TIER_INDEX)}
     >
       {entries &&
         entries.map((entry, entryIndex) => (
@@ -42,11 +50,13 @@ export const Inventory = ({
             key={entry.id}
             draggable="true"
             onDragStart={() =>
-              handleDragStart(entry, INVENTORY_TIER_INDEX, entryIndex)
+              handleDragStart(entry, entryIndex, INVENTORY_TIER_INDEX)
             }
-            onDragOver={(e) => handleDragOverEntry(e, entryIndex)}
-            onDragLeave={handleDragLeaveEntry}
-            onDragEnd={handleDragEnd}
+            onDragOver={(e) => e.preventDefault()}
+            onDragEnter={(e) =>
+              ultimateDragEnter(e, entryIndex, INVENTORY_TIER_INDEX)
+            }
+            //onDragLeave={handleDragLeaveEntry}
             opacity={entry.isPreview ? 0.5 : 1}
           >
             <Image src={entry.imageUrl} />
