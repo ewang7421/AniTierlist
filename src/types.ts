@@ -7,6 +7,8 @@ export type ListEntry = {
   imageUrl: string;
   score: number;
   tier: number;
+
+  isPreview: boolean;
 };
 
 export const enum ListWebsite {
@@ -25,13 +27,12 @@ export type TierModel = {
 // The entry that is being dragged
 export type DraggedEntry = {
   entry: ListEntry;
-  srcTierIndex: number; // -1 if from inventory
-  removedFromSrc: boolean;
+  srcTierIndex: number;
+  previewTierIndex?: number;
 };
 
 // The model for the tierlist
 export type TierlistModel = {
-  inventory: ListEntry[];
-  models: TierModel[];
+  models: TierModel[]; // the inventory is at index 0
   dragging?: DraggedEntry;
 };
