@@ -51,14 +51,60 @@ export const Dashboard = () => {
     if (!dragging) {
       return;
     }
-    setTierlistModel((tierlistModel) => ({
+    let newDragging = dragging;
+    setTierlistModel({
       ...tierlistModel,
       dragging: {
-        ...dragging,
+        ...newDragging,
         entryIndex: entryIndex,
         draggingOverEntry: true,
       },
-    }));
+    });
+    if (dragging.tierIndex === -1) {
+      const draggedOverEntry = tierlistModel.inventory[entryIndex];
+
+      if (
+        draggedOverEntry.id === dragging.entry.id &&
+        draggedOverEntry.isPreview === true
+      ) {
+        console.log("Preview is already there");
+        return;
+      }
+
+      if (draggedOverEntry.id === dragging.entry.id) {
+        setTierlistModel({
+          ...tierlistModel,
+          inventory: [
+            ...tierlistModel.inventory.slice(0, entryIndex),
+            { ...draggedOverEntry, isPreview: true },
+            ...tierlistModel.inventory.slice(entryIndex + 1),
+          ],
+          dragging: {
+            ...newDragging,
+            entryIndex: entryIndex,
+            draggingOverEntry: true,
+          },
+        });
+        return;
+      }
+
+      if (tierlistModel.inventory[entryIndex].id !== dragging.entry.id) {
+        const newInventory = tierlistModel.inventory.filter(
+          (entry) => entry.id !== dragging.entry.id
+        );
+        setTierlistModel({
+          ...tierlistModel,
+          inventory: [
+            ...newInventory.slice(0, entryIndex),
+            { ...dragging.entry, isPreview: true },
+            ...newInventory.slice(entryIndex),
+          ],
+        });
+        return;
+      }
+
+      console.error("Should not reach here");
+    }
   };
 
   const handleDragLeaveEntry = () => {
@@ -114,8 +160,32 @@ export const Dashboard = () => {
       setTierlistModel((tierlistModel) => ({
         ...tierlistModel,
         inventory: [
-          ...tierlistModel.inventory.slice(0, dragging.entryIndex),
+          ...tierlistModel.inventory.slice(0, entryIndex),
           { ...dragging.entry, isPreview: false },
+          ...tierlistModel.inventory.slice(entryIndex + 1),
+        ],
+        dragging: undefined,
+      }));
+    }
+  };
+
+  const handleEndDrag = () => {
+    const { dragging } = tierlistModel;
+    if (!dragging) {
+      return;
+    }
+    console.log(dragging.entryIndex);
+    if (dragging.tierIndex === -1) {
+      let droppingEntry = tierlistModel.inventory[dragging.entryIndex];
+      console.assert(
+        droppingEntry.id === dragging.entry.id,
+        "dropping wrong item"
+      );
+      setTierlistModel((tierlistModel) => ({
+        ...tierlistModel,
+        inventory: [
+          ...tierlistModel.inventory.slice(0, dragging.entryIndex),
+          { ...droppingEntry, isPreview: false },
           ...tierlistModel.inventory.slice(dragging.entryIndex + 1),
         ],
         dragging: undefined,
@@ -175,7 +245,7 @@ export const Dashboard = () => {
           handleDragOverEntry={handleDragOverEntry}
           handleDragLeaveEntry={handleDragLeaveEntry}
           handleDragOverTier={handleDragOverTier}
-          handleDrop={handleDrop}
+          handleDragEnd={handleEndDrag}
         />
       </VStack>
     </Box>

@@ -17,7 +17,7 @@ interface InventoryProps {
     event: React.DragEvent<HTMLDivElement>,
     tierIndex: number
   ) => void;
-  handleDrop: (tierIndex: number, entryIndex: number) => void;
+  handleDragEnd: () => void;
 }
 
 const INVENTORY_TIER_INDEX = -1;
@@ -28,7 +28,7 @@ export const Inventory = ({
   handleDragOverEntry,
   handleDragLeaveEntry,
   handleDragOverTier,
-  handleDrop,
+  handleDragEnd,
 }: InventoryProps) => {
   return (
     <Flex
@@ -46,7 +46,8 @@ export const Inventory = ({
             }
             onDragOver={(e) => handleDragOverEntry(e, entryIndex)}
             onDragLeave={handleDragLeaveEntry}
-            onDrop={() => handleDrop(INVENTORY_TIER_INDEX, entryIndex)}
+            onDragEnd={handleDragEnd}
+            opacity={entry.isPreview ? 0.5 : 1}
           >
             <Image src={entry.imageUrl} />
           </Box>
