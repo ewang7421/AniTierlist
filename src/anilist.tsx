@@ -31,9 +31,7 @@ query ($userName: String) { # Define which variables will be used in the query (
 `;
 
 // Make the HTTP Api request
-export async function getList(
-  username: string,
-): Promise<ListEntry[]> {
+export async function getList(username: string): Promise<ListEntry[]> {
   // Define our query variables and values that will be used in the query request
   let variables = {
     userName: username,
@@ -66,9 +64,7 @@ async function handleResponse(response: Response) {
   return response.ok ? json : Promise.reject(json);
 }
 
-function handleData(
-  data: any,
-): ListEntry[] {
+function handleData(data: any): ListEntry[] {
   console.log(data);
   let completedList = data.data.MediaListCollection.lists.filter(
     (list: any) => !list.isCustomList && list.status === "COMPLETED"
@@ -82,6 +78,7 @@ function handleData(
     imageUrl: entry.media.coverImage.large,
     score: entry.score,
     tier: 0,
+    isPreview: false,
   }));
 
   console.assert(

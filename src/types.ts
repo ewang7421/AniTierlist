@@ -7,6 +7,7 @@ export type ListEntry = {
   imageUrl: string;
   score: number;
   tier: number;
+  isPreview: boolean;
 };
 
 export const enum ListWebsite {
@@ -27,6 +28,7 @@ export type DraggedEntry = {
   entry: ListEntry;
   tierIndex: number; // -1 if from inventory
   entryIndex: number;
+  draggingOverEntry: boolean;
 };
 
 // The model for the tierlist

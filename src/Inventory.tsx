@@ -4,54 +4,49 @@ import { DraggedEntry, ListEntry } from "./types";
 interface InventoryProps {
   entries: ListEntry[];
   handleDragStart: (
-    event: React.DragEvent<HTMLDivElement>,
-    entry: DraggedEntry
+    entry: ListEntry,
+    tierIndex: number,
+    entryIndex: number
   ) => void;
-  handleDragOver: (
+  handleDragOverEntry: (
+    event: React.DragEvent<HTMLDivElement>,
+    entryIndex: number
+  ) => void;
+  handleDragLeaveEntry: () => void;
+  handleDragOverTier: (
     event: React.DragEvent<HTMLDivElement>,
     tierIndex: number
   ) => void;
-  handleDragLeave: (event: React.DragEvent<HTMLDivElement>) => void;
-  handleDrop: (
-    event: React.DragEvent<HTMLDivElement>,
-    tierIndex: number
-  ) => void;
-  handleDragOverEntry: (index: number) => void;
+  handleDrop: (tierIndex: number, entryIndex: number) => void;
 }
+
+const INVENTORY_TIER_INDEX = -1;
 
 export const Inventory = ({
   entries,
   handleDragStart,
-  handleDragOver,
-  handleDragLeave,
-  handleDrop,
   handleDragOverEntry,
+  handleDragLeaveEntry,
+  handleDragOverTier,
+  handleDrop,
 }: InventoryProps) => {
   return (
     <Flex
       flexWrap="wrap"
-      onDragOver={(e) => handleDragOver(e, -1)}
-      onDragLeave={handleDragLeave}
-      onDrop={(e) => {
-        handleDrop(e, -1);
-      }}
+      onDragOver={(e) => handleDragOverTier(e, INVENTORY_TIER_INDEX)}
     >
       {entries &&
-        entries.map((entry, index) => (
+        entries.map((entry, entryIndex) => (
           <Box
             id={entry.id.toString()}
             key={entry.id}
             draggable="true"
-            onDragStart={(e) => {
-              handleDragStart(e, {
-                entry,
-                entryIndex: index,
-                tierIndex: -1,
-              });
-            }}
-            onDragOver={() => {
-              handleDragOverEntry(index);
-            }}
+            onDragStart={() =>
+              handleDragStart(entry, INVENTORY_TIER_INDEX, entryIndex)
+            }
+            onDragOver={(e) => handleDragOverEntry(e, entryIndex)}
+            onDragLeave={handleDragLeaveEntry}
+            onDrop={() => handleDrop(INVENTORY_TIER_INDEX, entryIndex)}
           >
             <Image src={entry.imageUrl} />
           </Box>
