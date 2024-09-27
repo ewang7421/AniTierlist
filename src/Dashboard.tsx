@@ -39,16 +39,15 @@ export const Dashboard = () => {
   }
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>, tierIndex: number, entryIndex: number) => {
-    event.preventDefault();
-    event.stopPropagation();
-
     const { models, dragging } = tierlistModel;
     if (dragging === undefined) {
       return;
     }
+    event.preventDefault();
+    event.stopPropagation();
 
     // Remove the preview from it's previous location
-    let newModels = [
+    const newModels = [
       ...models.slice(0, dragging.previewTierIndex),
       {
         ...models[dragging.previewTierIndex],
@@ -58,12 +57,13 @@ export const Dashboard = () => {
     ];
 
     // Insert the entry into the destination tier
+    const entryIdx = Math.min(entryIndex, newModels[tierIndex].entries.length);
     newModels[tierIndex] = {
       ...newModels[tierIndex],
       entries: [
-        ...newModels[tierIndex].entries.slice(0, entryIndex),
+        ...newModels[tierIndex].entries.slice(0, entryIdx),
         dragging.entry,
-        ...newModels[tierIndex].entries.slice(entryIndex),
+        ...newModels[tierIndex].entries.slice(entryIdx),
       ]
     };
 
@@ -74,11 +74,13 @@ export const Dashboard = () => {
     }));
   }
 
-  const handleDrop = () => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     const { dragging } = tierlistModel;
     if (!dragging) {
       return;
     }
+    event.preventDefault();
+    event.stopPropagation();
 
     // Replace the preview with the actual entry
     const newEntries = tierlistModel.models[dragging.previewTierIndex].entries.map((entry) => {
@@ -97,7 +99,9 @@ export const Dashboard = () => {
   }
 
   return (
-    <Box>
+    <Box
+      onDrop={handleDrop}
+      onDragOver={(e) => e.preventDefault()}>
       <VStack>
         <Text>Dashboard</Text>
         <HStack>
