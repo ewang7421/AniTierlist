@@ -26,9 +26,7 @@ export type TierModel = {
 // The entry that is being dragged
 export type DraggedEntry = {
   entry: ListEntry;
-  tierIndex: number; // -1 if from inventory
-  entryIndex: number;
-  draggingOverEntry: boolean;
+  tierIndex: number;
 };
 
 // The model for the tierlist

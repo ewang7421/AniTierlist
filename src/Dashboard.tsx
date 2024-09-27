@@ -25,18 +25,12 @@ export const Dashboard = () => {
     ],
   });
 
-  const handleDragStart = (
-    entry: ListEntry,
-    entryIndex: number,
-    tierIndex: number
-  ) => {
+  const handleDragStart = (entry: ListEntry, tierIndex: number) => {
     setTierlistModel((tierlistModel) => ({
       ...tierlistModel,
       dragging: {
         entry: { ...entry, isPreview: true },
-        tierIndex,
-        entryIndex,
-        draggingOverEntry: true,
+        tierIndex: tierIndex,
       },
     }));
   };
@@ -59,8 +53,7 @@ export const Dashboard = () => {
         models: resTierModels,
         dragging: {
           ...tierlistModel.dragging!,
-          tierIndex,
-          entryIndex,
+          tierIndex: tierIndex,
         },
       };
     });
@@ -128,7 +121,6 @@ export const Dashboard = () => {
                 const entries = await getList(username); // Set the state with the fetched data
                 // Set the tier list model's inventory to the fetched anime list
                 setTierlistModel((tierlistModel) => ({
-                  //set the 0th tier to the fetched list
                   ...tierlistModel,
                   models: [
                     {

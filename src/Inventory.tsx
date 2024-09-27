@@ -3,11 +3,7 @@ import { ListEntry } from "./types";
 
 interface InventoryProps {
   entries: ListEntry[];
-  handleDragStart: (
-    entry: ListEntry,
-    entryIndex: number,
-    tierIndex: number
-  ) => void;
+  handleDragStart: (entry: ListEntry, tierIndex: number) => void;
   handleDragEnter: (tierIndex: number, entryIndex: number) => void;
 }
 
@@ -23,6 +19,7 @@ export const Inventory = ({
     <Flex
       flexWrap="wrap"
       onDragEnter={() => handleDragEnter(INVENTORY_TIER_INDEX, END_OF_TIER)}
+      onDragOver={(e) => e.preventDefault()}
     >
       {entries &&
         entries.map((entry, entryIndex) => (
@@ -30,10 +27,7 @@ export const Inventory = ({
             id={entry.id.toString()}
             key={entry.id}
             draggable="true"
-            onDragStart={() =>
-              handleDragStart(entry, entryIndex, INVENTORY_TIER_INDEX)
-            }
-            onDragOver={(e) => e.preventDefault()}
+            onDragStart={() => handleDragStart(entry, INVENTORY_TIER_INDEX)}
             onDragEnter={(e) => {
               e.stopPropagation();
               handleDragEnter(INVENTORY_TIER_INDEX, entryIndex);

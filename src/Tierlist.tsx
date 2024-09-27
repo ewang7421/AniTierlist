@@ -3,11 +3,7 @@ import { ListEntry, TierModel } from "./types";
 
 interface TierlistProps {
   tierModels: TierModel[];
-  handleDragStart: (
-    entry: ListEntry,
-    entryIndex: number,
-    tierIndex: number
-  ) => void;
+  handleDragStart: (entry: ListEntry, tierIndex: number) => void;
   handleDragEnter: (tierIndex: number, entryIndex: number) => void;
 }
 const END_OF_TIER = -1;
@@ -33,6 +29,7 @@ export const Tierlist = ({
                 flexWrap="wrap"
                 flexGrow={1}
                 onDragEnter={() => handleDragEnter(tierIndex, END_OF_TIER)}
+                onDragOver={(e) => e.preventDefault()}
               >
                 {model.entries &&
                   model.entries.map((entry, entryIndex) => (
@@ -44,9 +41,7 @@ export const Tierlist = ({
                         e.stopPropagation();
                         handleDragEnter(tierIndex, entryIndex);
                       }}
-                      onDragStart={() =>
-                        handleDragStart(entry, entryIndex, tierIndex)
-                      }
+                      onDragStart={() => handleDragStart(entry, tierIndex)}
                       opacity={entry.isPreview ? 0.5 : 1}
                     >
                       <Image src={entry.imageUrl} />
