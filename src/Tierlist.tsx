@@ -6,7 +6,7 @@ interface TierlistProps {
   tierModels: TierModel[];
   handleDragStart: (entry: ListEntry, tierIndex: number) => void;
   handleDragOver: (event: React.DragEvent<HTMLDivElement>, tierIndex: number, entryIndex: number) => void;
-  handleDrop: (event: React.DragEvent<HTMLDivElement>) => void;
+  handleDrop: () => void;
 }
 
 export const Tierlist = ({ tierModels, handleDragStart, handleDragOver, handleDrop }: TierlistProps) => {

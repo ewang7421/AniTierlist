@@ -6,7 +6,7 @@ interface InventoryProps {
   entries: ListEntry[];
   handleDragStart: (entry: ListEntry, tierIndex: number) => void;
   handleDragOver: (event: React.DragEvent<HTMLDivElement>, tierIndex: number, entryIndex: number) => void;
-  handleDrop: (event: React.DragEvent<HTMLDivElement>) => void;
+  handleDrop: () => void;
 }
 
 export const Inventory = ({ entries, handleDragStart, handleDragOver, handleDrop }: InventoryProps) => {

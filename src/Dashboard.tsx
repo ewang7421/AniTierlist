@@ -74,7 +74,7 @@ export const Dashboard = () => {
     }));
   }
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = () => {
     const { dragging } = tierlistModel;
     if (!dragging) {
       return;
