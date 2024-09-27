@@ -59,21 +59,20 @@ export const Dashboard = () => {
     });
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = (event: React.DragEvent<HTMLDivElement>) => {
     //go through the entries of the tier, if the entry is a preview, set the preview to false
     const { dragging } = tierlistModel;
     if (!dragging) {
       return;
     }
 
-    console.log("outside tierIndex", dragging.tierIndex);
-    setTierlistModel((tierlistModel) => {
-      const tierIndex = dragging.tierIndex;
-      console.log("inside tierIndex", tierIndex);
-      const newEntries = tierlistModel.models[tierIndex].entries.map((entry) =>
-        entry.id === dragging.entry.id ? { ...entry, isPreview: false } : entry
-      );
+    event.preventDefault();
 
+    const tierIndex = dragging.tierIndex;
+    const newEntries = tierlistModel.models[tierIndex].entries.map((entry) =>
+      entry.id === dragging.entry.id ? { ...entry, isPreview: false } : entry
+    );
+    setTierlistModel((tierlistModel) => {
       return {
         ...tierlistModel,
         models: [
@@ -123,7 +122,14 @@ export const Dashboard = () => {
   };
 
   return (
-    <Box>
+    <Box
+      onDragOver={(e) => {
+        if (tierlistModel.dragging) {
+          e.preventDefault();
+        }
+      }}
+      onDrop={(e) => handleDragEnd(e)}
+    >
       <VStack>
         <Text>Dashboard</Text>
         <HStack>
@@ -170,13 +176,11 @@ export const Dashboard = () => {
           tierModels={tierlistModel.models}
           handleDragStart={handleDragStart}
           handleDragEnter={handleDragEnter}
-          handleDragEnd={handleDragEnd}
         />
         <Inventory
           entries={tierlistModel.models[0].entries}
           handleDragStart={handleDragStart}
           handleDragEnter={handleDragEnter}
-          handleDragEnd={handleDragEnd}
         />
       </VStack>
     </Box>
