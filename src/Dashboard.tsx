@@ -7,7 +7,7 @@ import {
   VStack,
   Text,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getList } from "./anilist";
 import { ListWebsite, TierlistModel, TierModel, ListEntry } from "./types";
 import { Tierlist } from "./Tierlist";
@@ -25,97 +25,6 @@ export const Dashboard = () => {
     ],
   });
 
-  const ultimateDragEnter = (
-    event: React.DragEvent<HTMLDivElement>,
-    entryIndex: number,
-    tierIndex: number
-  ) => {
-    event.stopPropagation();
-    console.log(
-      "dragging from tier",
-      tierlistModel.dragging?.tierIndex,
-      ", entry",
-      tierlistModel.dragging?.entryIndex,
-      "to tier",
-      tierIndex,
-      ", entry",
-      entryIndex
-    );
-    const { dragging } = tierlistModel;
-    if (!dragging) {
-      return;
-    }
-    let srcTierIndex = dragging.tierIndex;
-    let destTierIndex = tierIndex;
-    let resTierModels = tierlistModel.models;
-
-    // first remove the entry from the source tier
-    let srcTierModel = resTierModels[srcTierIndex];
-    srcTierModel = {
-      ...srcTierModel,
-      entries: srcTierModel.entries.filter((e) => e.id !== dragging.entry.id),
-    };
-
-    resTierModels = [
-      ...resTierModels.slice(0, srcTierIndex),
-      srcTierModel,
-      ...resTierModels.slice(srcTierIndex + 1),
-    ];
-
-    if (srcTierIndex === destTierIndex) {
-      entryIndex = entryIndex === -1 ? srcTierModel.entries.length : entryIndex;
-      srcTierModel = {
-        ...srcTierModel,
-        entries: [
-          ...srcTierModel.entries.slice(0, entryIndex),
-          dragging.entry,
-          ...srcTierModel.entries.slice(entryIndex),
-        ],
-      };
-      resTierModels = [
-        ...resTierModels.slice(0, srcTierIndex),
-        srcTierModel,
-        ...resTierModels.slice(srcTierIndex + 1),
-      ];
-    } else {
-      let destTierModel = resTierModels[destTierIndex];
-
-      entryIndex =
-        entryIndex === -1 ? destTierModel.entries.length : entryIndex;
-
-      destTierModel = {
-        ...destTierModel,
-        entries: [
-          ...destTierModel.entries.slice(0, entryIndex),
-          dragging.entry,
-          ...destTierModel.entries.slice(entryIndex),
-        ],
-      };
-
-      resTierModels = [
-        ...resTierModels.slice(0, srcTierIndex),
-        srcTierModel,
-        ...resTierModels.slice(srcTierIndex + 1),
-      ];
-
-      resTierModels = [
-        ...resTierModels.slice(0, destTierIndex),
-        destTierModel,
-        ...resTierModels.slice(destTierIndex + 1),
-      ];
-    }
-
-    setTierlistModel((tierlistModel) => ({
-      ...tierlistModel,
-      models: resTierModels,
-      dragging: {
-        ...tierlistModel.dragging!,
-        tierIndex,
-        entryIndex,
-      },
-    }));
-  };
-
   const handleDragStart = (
     entry: ListEntry,
     entryIndex: number,
@@ -130,140 +39,67 @@ export const Dashboard = () => {
         draggingOverEntry: true,
       },
     }));
-    console.log("started dragging entry at index", entryIndex);
   };
+
+  const handleDragEnter = (tierIndex: number, entryIndex: number) => {
+    const { dragging } = tierlistModel;
+    if (!dragging) {
+      return tierlistModel;
+    }
+    const resTierModels = moveEntry(
+      dragging.tierIndex,
+      tierIndex,
+      entryIndex,
+      dragging.entry,
+      tierlistModel.models
+    );
+    setTierlistModel((tierlistModel) => {
+      return {
+        ...tierlistModel,
+        models: resTierModels,
+        dragging: {
+          ...tierlistModel.dragging!,
+          tierIndex,
+          entryIndex,
+        },
+      };
+    });
+  };
+
   const moveEntry = (
     srcTierIndex: number,
     destTierIndex: number,
     destEntryIndex: number,
     entry: ListEntry,
-    tierModels: TierModel[]
+    models: TierModel[]
   ): TierModel[] => {
-    console.log("moving");
-    let srcTierEntries = tierModels[srcTierIndex].entries;
-    srcTierEntries = srcTierEntries.filter((e) => e.id !== entry.id);
-    if (srcTierIndex === destTierIndex) {
-      srcTierEntries =
-        destEntryIndex === -1
-          ? [...srcTierEntries, entry]
-          : [
-              ...srcTierEntries.slice(0, destEntryIndex),
-              entry,
-              ...srcTierEntries.slice(destEntryIndex),
-            ];
-
-      return [
-        ...tierModels.slice(0, srcTierIndex),
-        { ...tierModels[srcTierIndex], entries: srcTierEntries },
-        ...tierModels.slice(srcTierIndex + 1),
-      ];
+    let resTierModels = [
+      ...models.slice(0, srcTierIndex),
+      {
+        ...models[srcTierIndex],
+        entries: models[srcTierIndex].entries.filter(
+          (oldEntry) => oldEntry.id !== entry.id
+        ),
+      },
+      ...models.slice(srcTierIndex + 1),
+    ];
+    if (destEntryIndex === -1) {
+      //add to end of tier
+      resTierModels[destTierIndex] = {
+        ...resTierModels[destTierIndex],
+        entries: [...resTierModels[destTierIndex].entries, entry],
+      };
     } else {
-      let destTierEntries = tierModels[destTierIndex].entries;
-      destTierEntries =
-        destEntryIndex === -1
-          ? [...destTierEntries, entry]
-          : [
-              ...destTierEntries.slice(0, destEntryIndex),
-              entry,
-              ...destTierEntries.slice(destEntryIndex),
-            ];
-      const firstIndex = Math.min(srcTierIndex, destTierIndex);
-      const secondIndex = Math.max(srcTierIndex, destTierIndex);
-      const firstEntries =
-        srcTierIndex < destTierIndex ? srcTierEntries : destTierEntries;
-      const secondEntries =
-        srcTierIndex < destTierIndex ? destTierEntries : srcTierEntries;
-
-      return [
-        ...tierModels.slice(0, firstIndex),
-        { ...tierModels[firstIndex], entries: firstEntries },
-        ...tierModels.slice(firstIndex + 1, secondIndex),
-        { ...tierModels[secondIndex], entries: secondEntries },
-        ...tierModels.slice(secondIndex + 1),
-      ];
+      resTierModels[destTierIndex] = {
+        ...resTierModels[destTierIndex],
+        entries: [
+          ...resTierModels[destTierIndex].entries.slice(0, destEntryIndex),
+          entry,
+          ...resTierModels[destTierIndex].entries.slice(destEntryIndex),
+        ],
+      };
     }
-  };
-  const handleDragEnterEntry = (
-    event: React.DragEvent<HTMLDivElement>,
-    entryIndex: number,
-    tierIndex: number
-  ) => {
-    event.stopPropagation();
-    console.log("entered entry", entryIndex);
-    const { dragging } = tierlistModel;
-    if (!dragging) {
-      return;
-    }
-    setTierlistModel((tierlistModel) => ({
-      ...tierlistModel,
-      models: moveEntry(
-        dragging.tierIndex,
-        tierIndex,
-        entryIndex,
-        dragging.entry,
-        tierlistModel.models
-      ),
-      dragging: { ...tierlistModel.dragging!, draggingOverEntry: true },
-    }));
-  };
-  const handleDragLeaveEntry = () => {
-    console.log("left entry" + tierlistModel.dragging?.entryIndex);
-    if (!tierlistModel.dragging) {
-      return tierlistModel;
-    }
-    setTierlistModel((tierlistModel) => ({
-      ...tierlistModel,
-      dragging: { ...tierlistModel.dragging!, draggingOverEntry: false },
-    }));
-  };
-  const handleDragEnterTier = (
-    event: React.DragEvent<HTMLDivElement>,
-    tierIndex: number
-  ) => {
-    console.log("old tier", tierlistModel.dragging?.tierIndex);
-    console.log("entered tier", tierIndex);
-
-    const { dragging } = tierlistModel;
-    if (!dragging) {
-      return tierlistModel;
-    }
-
-    setTierlistModel((tierlistModel) => ({
-      ...tierlistModel,
-      models: moveIntoTier(
-        dragging.tierIndex,
-        tierIndex,
-        dragging.entry,
-        tierlistModel.models
-      ),
-      dragging: { ...tierlistModel.dragging!, tierIndex },
-    }));
-  };
-
-  const moveIntoTier = (
-    srcTierIndex: number,
-    destTierIndex: number,
-    entry: ListEntry,
-    oldTierModels: TierModel[]
-  ): TierModel[] => {
-    const srcTierEntries = oldTierModels[srcTierIndex].entries.filter(
-      (e) => e.id !== entry.id
-    );
-
-    let destTierEntries = [...oldTierModels[destTierIndex].entries, entry];
-    if (srcTierIndex === destTierIndex) {
-      destTierEntries = [...srcTierEntries, entry];
-    }
-
-    return oldTierModels.map((tier, index) => {
-      if (index === destTierIndex) {
-        return { ...tier, entries: destTierEntries };
-      } else if (index === srcTierIndex) {
-        return { ...tier, entries: srcTierEntries };
-      } else {
-        return tier;
-      }
-    });
+    return resTierModels;
   };
 
   return (
@@ -314,18 +150,12 @@ export const Dashboard = () => {
         <Tierlist
           tierModels={tierlistModel.models}
           handleDragStart={handleDragStart}
-          handleDragEnterEntry={handleDragEnterEntry}
-          handleDragLeaveEntry={handleDragLeaveEntry}
-          handleDragEnterTier={handleDragEnterTier}
-          ultimateDragEnter={ultimateDragEnter}
+          handleDragEnter={handleDragEnter}
         />
         <Inventory
           entries={tierlistModel.models[0].entries}
           handleDragStart={handleDragStart}
-          handleDragEnterEntry={handleDragEnterEntry}
-          handleDragLeaveEntry={handleDragLeaveEntry}
-          handleDragEnterTier={handleDragEnterTier}
-          ultimateDragEnter={ultimateDragEnter}
+          handleDragEnter={handleDragEnter}
         />
       </VStack>
     </Box>

@@ -1,47 +1,28 @@
 import { Box, Flex, Image } from "@chakra-ui/react";
 import { ListEntry } from "./types";
-import React from "react";
-import { SSL_OP_NO_TLSv1_1 } from "constants";
 
 interface InventoryProps {
   entries: ListEntry[];
   handleDragStart: (
     entry: ListEntry,
-    tierIndex: number,
-    entryIndex: number
-  ) => void;
-  handleDragEnterEntry: (
-    event: React.DragEvent<HTMLDivElement>,
     entryIndex: number,
     tierIndex: number
   ) => void;
-  handleDragLeaveEntry: () => void;
-  handleDragEnterTier: (
-    event: React.DragEvent<HTMLDivElement>,
-    tierIndex: number
-  ) => void;
-
-  ultimateDragEnter: (
-    e: React.DragEvent<HTMLDivElement>,
-    entryIndex: number,
-    tierIndex: number
-  ) => void;
+  handleDragEnter: (tierIndex: number, entryIndex: number) => void;
 }
 
 const INVENTORY_TIER_INDEX = 0;
+const END_OF_TIER = -1;
 
 export const Inventory = ({
   entries,
   handleDragStart,
-  handleDragEnterEntry,
-  handleDragLeaveEntry,
-  handleDragEnterTier,
-  ultimateDragEnter,
+  handleDragEnter,
 }: InventoryProps) => {
   return (
     <Flex
       flexWrap="wrap"
-      onDragEnter={(e) => ultimateDragEnter(e, -1, INVENTORY_TIER_INDEX)}
+      onDragEnter={() => handleDragEnter(INVENTORY_TIER_INDEX, END_OF_TIER)}
     >
       {entries &&
         entries.map((entry, entryIndex) => (
@@ -53,10 +34,10 @@ export const Inventory = ({
               handleDragStart(entry, entryIndex, INVENTORY_TIER_INDEX)
             }
             onDragOver={(e) => e.preventDefault()}
-            onDragEnter={(e) =>
-              ultimateDragEnter(e, entryIndex, INVENTORY_TIER_INDEX)
-            }
-            //onDragLeave={handleDragLeaveEntry}
+            onDragEnter={(e) => {
+              e.stopPropagation();
+              handleDragEnter(INVENTORY_TIER_INDEX, entryIndex);
+            }}
             opacity={entry.isPreview ? 0.5 : 1}
           >
             <Image src={entry.imageUrl} />

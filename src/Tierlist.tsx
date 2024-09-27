@@ -8,30 +8,14 @@ interface TierlistProps {
     entryIndex: number,
     tierIndex: number
   ) => void;
-  handleDragEnterEntry: (
-    event: React.DragEvent<HTMLDivElement>,
-    entryIndex: number,
-    tierIndex: number
-  ) => void;
-  handleDragLeaveEntry: () => void;
-  handleDragEnterTier: (
-    event: React.DragEvent<HTMLDivElement>,
-    tierIndex: number
-  ) => void;
-  ultimateDragEnter: (
-    e: React.DragEvent<HTMLDivElement>,
-    entryIndex: number,
-    tierIndex: number
-  ) => void;
+  handleDragEnter: (tierIndex: number, entryIndex: number) => void;
 }
+const END_OF_TIER = -1;
 
 export const Tierlist = ({
   tierModels,
-  handleDragEnterEntry,
-  handleDragLeaveEntry,
-  handleDragEnterTier,
   handleDragStart,
-  ultimateDragEnter,
+  handleDragEnter,
 }: TierlistProps) => {
   // TODO: Unsure if index is needed. Tiers will be organized by some value that we assign to it anyway
   return (
@@ -48,7 +32,7 @@ export const Tierlist = ({
               <Flex
                 flexWrap="wrap"
                 flexGrow={1}
-                onDragEnter={(e) => ultimateDragEnter(e, -1, tierIndex)}
+                onDragEnter={() => handleDragEnter(tierIndex, END_OF_TIER)}
               >
                 {model.entries &&
                   model.entries.map((entry, entryIndex) => (
@@ -56,10 +40,10 @@ export const Tierlist = ({
                       id={entry.id.toString()}
                       key={entry.id}
                       draggable="true"
-                      onDragEnter={(e) =>
-                        ultimateDragEnter(e, entryIndex, tierIndex)
-                      }
-                      //onDragLeave={handleDragLeaveEntry}
+                      onDragEnter={(e) => {
+                        e.stopPropagation();
+                        handleDragEnter(tierIndex, entryIndex);
+                      }}
                       onDragStart={() =>
                         handleDragStart(entry, entryIndex, tierIndex)
                       }
