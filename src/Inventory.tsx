@@ -5,6 +5,7 @@ interface InventoryProps {
   entries: ListEntry[];
   handleDragStart: (entry: ListEntry, tierIndex: number) => void;
   handleDragEnter: (tierIndex: number, entryIndex: number) => void;
+  handleDragEnd: () => void;
 }
 
 const INVENTORY_TIER_INDEX = 0;
@@ -14,6 +15,7 @@ export const Inventory = ({
   entries,
   handleDragStart,
   handleDragEnter,
+  handleDragEnd,
 }: InventoryProps) => {
   return (
     <Flex

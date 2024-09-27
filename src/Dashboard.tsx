@@ -59,6 +59,33 @@ export const Dashboard = () => {
     });
   };
 
+  const handleDragEnd = () => {
+    //go through the entries of the tier, if the entry is a preview, set the preview to false
+    const { dragging } = tierlistModel;
+    if (!dragging) {
+      return;
+    }
+
+    console.log("outside tierIndex", dragging.tierIndex);
+    setTierlistModel((tierlistModel) => {
+      const tierIndex = dragging.tierIndex;
+      console.log("inside tierIndex", tierIndex);
+      const newEntries = tierlistModel.models[tierIndex].entries.map((entry) =>
+        entry.id === dragging.entry.id ? { ...entry, isPreview: false } : entry
+      );
+
+      return {
+        ...tierlistModel,
+        models: [
+          ...tierlistModel.models.slice(0, tierIndex),
+          { ...tierlistModel.models[tierIndex], entries: newEntries },
+          ...tierlistModel.models.slice(tierIndex + 1),
+        ],
+        dragging: undefined,
+      };
+    });
+  };
+
   const moveEntry = (
     srcTierIndex: number,
     destTierIndex: number,
@@ -143,11 +170,13 @@ export const Dashboard = () => {
           tierModels={tierlistModel.models}
           handleDragStart={handleDragStart}
           handleDragEnter={handleDragEnter}
+          handleDragEnd={handleDragEnd}
         />
         <Inventory
           entries={tierlistModel.models[0].entries}
           handleDragStart={handleDragStart}
           handleDragEnter={handleDragEnter}
+          handleDragEnd={handleDragEnd}
         />
       </VStack>
     </Box>

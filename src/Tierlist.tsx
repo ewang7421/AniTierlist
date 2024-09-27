@@ -5,6 +5,7 @@ interface TierlistProps {
   tierModels: TierModel[];
   handleDragStart: (entry: ListEntry, tierIndex: number) => void;
   handleDragEnter: (tierIndex: number, entryIndex: number) => void;
+  handleDragEnd: () => void;
 }
 const END_OF_TIER = -1;
 
@@ -12,6 +13,7 @@ export const Tierlist = ({
   tierModels,
   handleDragStart,
   handleDragEnter,
+  handleDragEnd,
 }: TierlistProps) => {
   // TODO: Unsure if index is needed. Tiers will be organized by some value that we assign to it anyway
   return (
