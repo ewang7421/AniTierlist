@@ -1,10 +1,10 @@
 import { Flex } from "@chakra-ui/react";
 import { Entry } from "./Entry";
-import { DraggedEntry, ListEntry } from "./types";
+import { ListEntry } from "./types";
 
 interface InventoryProps {
   entries: ListEntry[];
-  handleDragStart: (event: React.DragEvent<HTMLDivElement>, entry: DraggedEntry) => void;
+  handleDragStart: (entry: ListEntry, tierIndex: number) => void;
   handleDragOver: (event: React.DragEvent<HTMLDivElement>, tierIndex: number, entryIndex: number) => void;
   handleDrop: (event: React.DragEvent<HTMLDivElement>) => void;
 }

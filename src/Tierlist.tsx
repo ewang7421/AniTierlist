@@ -1,10 +1,10 @@
 import { Text, Flex, Center } from "@chakra-ui/react";
-import { DraggedEntry, TierModel } from "./types";
+import { ListEntry, TierModel } from "./types";
 import { Entry } from "./Entry";
 
 interface TierlistProps {
   tierModels: TierModel[];
-  handleDragStart: (event: React.DragEvent<HTMLDivElement>, entry: DraggedEntry) => void;
+  handleDragStart: (entry: ListEntry, tierIndex: number) => void;
   handleDragOver: (event: React.DragEvent<HTMLDivElement>, tierIndex: number, entryIndex: number) => void;
   handleDrop: (event: React.DragEvent<HTMLDivElement>) => void;
 }

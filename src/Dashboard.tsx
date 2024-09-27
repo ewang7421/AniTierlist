@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { getList } from "./anilist";
-import { ListWebsite, TierlistModel, DraggedEntry } from "./types";
+import { ListWebsite, TierlistModel, ListEntry } from "./types";
 import { Tierlist } from "./Tierlist";
 import { Inventory } from "./Inventory";
 
@@ -28,10 +28,13 @@ export const Dashboard = () => {
     ],
   });
 
-  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, dragEntry: DraggedEntry) => {
+  const handleDragStart = (entry: ListEntry, tierIndex: number) => {
     setTierlistModel((tierlistModel) => ({
       ...tierlistModel,
-      dragging: dragEntry,
+      dragging: {
+        entry: { ...entry, isPreview: true },
+        previewTierIndex: tierIndex
+      },
     }));
   }
 
@@ -39,48 +42,34 @@ export const Dashboard = () => {
     event.preventDefault();
     event.stopPropagation();
 
-    const { dragging } = tierlistModel;
+    const { models, dragging } = tierlistModel;
     if (dragging === undefined) {
       return;
     }
 
     // Remove the preview from it's previous location
-    let newModels = tierlistModel.models;
-    if (dragging.previewTierIndex !== undefined && dragging.previewTierIndex !== tierIndex) {
-      const prvTierModel = tierlistModel.models[dragging.previewTierIndex];
-      const newEntries = prvTierModel.entries.filter((entry) => entry.id !== dragging.entry.id);
-      const newTierModel = { ...prvTierModel, entries: newEntries };
-      newModels = [
-        ...tierlistModel.models.slice(0, dragging.previewTierIndex),
-        newTierModel,
-        ...tierlistModel.models.slice(dragging.previewTierIndex + 1),
-      ];
-    }
-
-    // Check if the preview is already in the destination tier
-    const destTierModel = tierlistModel.models[tierIndex];
-    let newEntries = destTierModel.entries;
-    if (dragging.previewTierIndex === tierIndex || destTierModel.entries.find((entry) => entry.id === dragging.entry.id) !== undefined) {
-      // get rid of the preview
-      newEntries = newEntries.filter((entry) => entry.id !== dragging.entry.id);
-    }
-
-    // Insert the entry into the destination tier
-    const previewEntry = { ...dragging.entry, isPreview: true };
-    newEntries = [
-      ...newEntries.slice(0, entryIndex),
-      previewEntry,
-      ...newEntries.slice(entryIndex),
+    let newModels = [
+      ...models.slice(0, dragging.previewTierIndex),
+      {
+        ...models[dragging.previewTierIndex],
+        entries: models[dragging.previewTierIndex].entries.filter((entry) => entry.id !== dragging.entry.id),
+      },
+      ...models.slice(dragging.previewTierIndex + 1),
     ];
 
-    const newTierModel = { ...destTierModel, entries: newEntries };
+    // Insert the entry into the destination tier
+    newModels[tierIndex] = {
+      ...newModels[tierIndex],
+      entries: [
+        ...newModels[tierIndex].entries.slice(0, entryIndex),
+        dragging.entry,
+        ...newModels[tierIndex].entries.slice(entryIndex),
+      ]
+    };
+
     setTierlistModel((tierlistModel) => ({
       ...tierlistModel,
-      models: [
-        ...newModels.slice(0, tierIndex),
-        newTierModel,
-        ...newModels.slice(tierIndex + 1),
-      ],
+      models: newModels,
       dragging: { ...dragging, previewTierIndex: tierIndex },
     }));
   }
@@ -91,26 +80,17 @@ export const Dashboard = () => {
       return;
     }
 
-    if (dragging.previewTierIndex === undefined) {
-      return;
-    }
-
-    const tierIndex = dragging.previewTierIndex;
-    const prevTierModel = tierlistModel.models[tierIndex];
-
     // Replace the preview with the actual entry
-    let newEntries = prevTierModel.entries.map((entry) => {
+    const newEntries = tierlistModel.models[dragging.previewTierIndex].entries.map((entry) => {
       return { ...entry, isPreview: false };
     });
 
-
-    const newTierModel = { ...prevTierModel, entries: newEntries };
     setTierlistModel((tierlistModel) => ({
       ...tierlistModel,
       models: [
-        ...tierlistModel.models.slice(0, tierIndex),
-        newTierModel,
-        ...tierlistModel.models.slice(tierIndex + 1),
+        ...tierlistModel.models.slice(0, dragging.previewTierIndex),
+        { ...tierlistModel.models[dragging.previewTierIndex], entries: newEntries },
+        ...tierlistModel.models.slice(dragging.previewTierIndex + 1),
       ],
       dragging: undefined
     }));

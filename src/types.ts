@@ -27,7 +27,7 @@ export type TierModel = {
 // The entry that is being dragged
 export type DraggedEntry = {
   entry: ListEntry;
-  previewTierIndex?: number;
+  previewTierIndex: number;
 };
 
 // The model for the tierlist
